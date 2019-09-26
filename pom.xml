@@ -122,6 +122,7 @@
         <module>srvutil</module>
         <module>filter</module>
         <module>test</module>
+        <module>benchmark</module>
         <module>distribution</module>
         <module>openmessaging</module>
         <module>logging</module>
