@@ -30,7 +30,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -48,7 +48,7 @@
             <maxFileSize>128MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -69,7 +69,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} - %m%n</pattern>
+            <pattern>%d - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -90,7 +90,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} - %m%n</pattern>
+            <pattern>%d - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -111,7 +111,7 @@
             <maxFileSize>128MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -132,7 +132,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -153,7 +153,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -175,7 +175,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -196,7 +196,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -217,7 +217,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p %t - %m%n</pattern>
+            <pattern>%d %p %t - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -238,7 +238,7 @@
             <maxFileSize>100MB</maxFileSize>
         </triggeringPolicy>
         <encoder>
-            <pattern>%d{yyy-MM-dd HH:mm:ss,GMT+8} %p - %m%n</pattern>
+            <pattern>%d %p - %m%n</pattern>
             <charset class="java.nio.charset.Charset">UTF-8</charset>
         </encoder>
     </appender>
@@ -265,67 +265,67 @@
         </encoder>
     </appender>
 
-    <logger name="RocketmqBroker" additivity="false">
+    <logger name="RocketmqBroker" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqBrokerAppender"/>
     </logger>
 
-    <logger name="RocketmqProtection" additivity="false">
+    <logger name="RocketmqProtection" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqProtectionAppender"/>
     </logger>
 
-    <logger name="RocketmqWaterMark" additivity="false">
+    <logger name="RocketmqWaterMark" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqWaterMarkAppender"/>
     </logger>
 
-    <logger name="RocketmqCommon" additivity="false">
+    <logger name="RocketmqCommon" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqBrokerAppender"/>
     </logger>
 
-    <logger name="RocketmqStore" additivity="false">
+    <logger name="RocketmqStore" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqStoreAppender"/>
     </logger>
 
-    <logger name="RocketmqStoreError" additivity="false">
+    <logger name="RocketmqStoreError" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqStoreErrorAppender"/>
     </logger>
 
-    <logger name="RocketmqTransaction" additivity="false">
+    <logger name="RocketmqTransaction" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqTransactionAppender"/>
     </logger>
 
-    <logger name="RocketmqRebalanceLock" additivity="false">
+    <logger name="RocketmqRebalanceLock" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqRebalanceLockAppender"/>
     </logger>
 
-    <logger name="RocketmqRemoting" additivity="false">
+    <logger name="RocketmqRemoting" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqRemotingAppender"/>
     </logger>
 
-    <logger name="RocketmqStats" additivity="false">
+    <logger name="RocketmqStats" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqStatsAppender"/>
     </logger>
 
-    <logger name="RocketmqCommercial" additivity="false">
+    <logger name="RocketmqCommercial" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqCommercialAppender"/>
     </logger>
 
-    <logger name="RocketmqFilter" additivity="false">
+    <logger name="RocketmqFilter" >
         <level value="INFO"/>
         <appender-ref ref="RocketmqFilterAppender"/>
     </logger>
 
-    <logger name="RocketmqConsole" additivity="false">
+    <logger name="RocketmqConsole" >
         <level value="INFO"/>
         <appender-ref ref="STDOUT"/>
     </logger>

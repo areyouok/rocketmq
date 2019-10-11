@@ -394,6 +394,9 @@ public class ConsumeQueue {
                         topic, queueId, request.getCommitLogOffset());
                 }
             }
+            if (request.getTopic().equalsIgnoreCase("RMQ_SYS_TRANS_OP_HALF_TOPIC")) {
+                log.info("dispatch_op " + request.getConsumeQueueOffset() + ","+new String(request.body));
+            }
             boolean result = this.putMessagePositionInfo(request.getCommitLogOffset(),
                 request.getMsgSize(), tagsCode, request.getConsumeQueueOffset());
             if (result) {

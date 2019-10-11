@@ -37,6 +37,8 @@ public class DispatchRequest {
 
     private int bufferSize = -1;//the buffer size maybe larger than the msg size if the message is wrapped by something
 
+    public byte[] body;
+
     public DispatchRequest(
         final String topic,
         final int queueId,

@@ -16,6 +16,8 @@
  */
 package org.apache.rocketmq.broker.transaction.queue;
 
+import static org.apache.rocketmq.common.message.MessageConst.PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX;
+
 import org.apache.rocketmq.broker.transaction.AbstractTransactionalMessageCheckListener;
 import org.apache.rocketmq.broker.transaction.OperationResult;
 import org.apache.rocketmq.broker.transaction.TransactionalMessageService;
@@ -34,11 +36,13 @@ import org.apache.rocketmq.store.MessageExtBrokerInner;
 import org.apache.rocketmq.store.PutMessageResult;
 import org.apache.rocketmq.store.PutMessageStatus;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -165,10 +169,11 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                         MessageExt msgExt = getResult.getMsg();
                         if (msgExt == null) {
                             if (getMessageNullCount++ > MAX_RETRY_COUNT_WHEN_HALF_NULL) {
+                                log.info("MAX_RETRY_COUNT_WHEN_HALF_NULL: " + i);
                                 break;
                             }
                             if (getResult.getPullResult().getPullStatus() == PullStatus.NO_NEW_MSG) {
-                                log.debug("No new msg, the miss offset={} in={}, continue check={}, pull result={}", i,
+                                log.info("No new msg, the miss offset={} in={}, continue check={}, pull result={}", i,
                                     messageQueue, getMessageNullCount, getResult.getPullResult());
                                 break;
                             } else {
@@ -187,7 +192,7 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                             continue;
                         }
                         if (msgExt.getStoreTimestamp() >= startTime) {
-                            log.debug("Fresh stored. the miss offset={}, check it later, store={}", i,
+                            log.info("Fresh stored. the miss offset={}, check it later, store={}", i,
                                 new Date(msgExt.getStoreTimestamp()));
                             break;
                         }
@@ -206,7 +211,7 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                             }
                         } else {
                             if ((0 <= valueOfCurrentMinusBorn) && (valueOfCurrentMinusBorn < checkImmunityTime)) {
-                                log.debug("New arrived, the miss offset={}, check it later checkImmunity={}, born={}", i,
+                                log.info("New arrived, the miss offset={}, check it later checkImmunity={}, born={}", i,
                                     checkImmunityTime, new Date(msgExt.getBornTimestamp()));
                                 break;
                             }
@@ -215,8 +220,34 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                         boolean isNeedCheck = (opMsg == null && valueOfCurrentMinusBorn > checkImmunityTime)
                             || (opMsg != null && (opMsg.get(opMsg.size() - 1).getBornTimestamp() - startTime > transactionTimeout))
                             || (valueOfCurrentMinusBorn <= -1);
+                        boolean needCheck1 = (opMsg == null && valueOfCurrentMinusBorn > checkImmunityTime);
+                        boolean needCheck2 = (opMsg != null && (opMsg.get(opMsg.size() - 1).getBornTimestamp() - startTime > transactionTimeout));
+                        boolean needCheck3 = (valueOfCurrentMinusBorn <= -1);
 
                         if (isNeedCheck) {
+                            SimpleDateFormat sdf = new SimpleDateFormat("HH:mm:ss,SSS");
+                            String now = sdf.format(new Date());
+                            String uniKey = msgExt.getUserProperty(PROPERTY_UNIQ_CLIENT_MESSAGE_ID_KEYIDX);
+
+                            Map<String, Object> m = new HashMap<>();
+                            m.put("msgId", msgExt.getMsgId());
+                            m.put("uniKey", uniKey);
+                            m.put("valueOfCurrentMinusBorn", valueOfCurrentMinusBorn);
+                            m.put("removeMapSize", removeMap.size());
+                            m.put("doneOpOffsetSize", doneOpOffset.size());
+                            m.put("startTime", startTime);
+                            m.put("opOffset", opOffset);
+                            m.put("halfOffset", halfOffset);
+                            m.put("newOffset", newOffset);
+
+                            if (needCheck1) {
+                                log.info(now + " [1] " + m);
+                            } else if (needCheck2) {
+                                log.info(now + " [2] " + m);
+                            } else {
+                                log.info(now + " [3] " + m);
+                            }
+
                             if (!putBackHalfMsgQueue(msgExt, i)) {
                                 continue;
                             }
@@ -233,10 +264,12 @@ public class TransactionalMessageServiceImpl implements TransactionalMessageServ
                 }
                 if (newOffset != halfOffset) {
                     transactionalMessageBridge.updateConsumeOffset(messageQueue, newOffset);
+                    log.info("move_half from " + halfOffset + " to " + newOffset);
                 }
                 long newOpOffset = calculateOpOffset(doneOpOffset, opOffset);
                 if (newOpOffset != opOffset) {
                     transactionalMessageBridge.updateConsumeOffset(opQueue, newOpOffset);
+                    log.info("move_op from " + opOffset + " to " + newOpOffset);
                 }
             }
         } catch (Exception e) {

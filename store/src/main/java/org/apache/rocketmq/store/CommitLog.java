@@ -281,7 +281,12 @@ public class CommitLog {
             long preparedTransactionOffset = byteBuffer.getLong();
 
             int bodyLen = byteBuffer.getInt();
+            byte[] body = null;
             if (bodyLen > 0) {
+                int p = byteBuffer.position();
+                body = new byte[bodyLen];
+                byteBuffer.get(body);
+                byteBuffer.position(p);
                 if (readBody) {
                     byteBuffer.get(bytesContent, 0, bodyLen);
 
@@ -352,7 +357,7 @@ public class CommitLog {
                 return new DispatchRequest(totalSize, false/* success */);
             }
 
-            return new DispatchRequest(
+            DispatchRequest dr = new DispatchRequest(
                 topic,
                 queueId,
                 physicOffset,
@@ -366,6 +371,8 @@ public class CommitLog {
                 preparedTransactionOffset,
                 propertiesMap
             );
+            dr.body = body;
+            return dr;
         } catch (Exception e) {
         }
 
