@@ -193,34 +193,55 @@ public class ProducerManager {
     }
 
     public Channel getAvaliableChannel(String groupId) {
-        HashMap<Channel, ClientChannelInfo> channelClientChannelInfoHashMap = groupChannelTable.get(groupId);
         List<Channel> channelList = new ArrayList<Channel>();
-        if (channelClientChannelInfoHashMap != null) {
-            for (Channel channel : channelClientChannelInfoHashMap.keySet()) {
-                channelList.add(channel);
-            }
-            int size = channelList.size();
-            if (0 == size) {
-                log.warn("Channel list is empty. groupId={}", groupId);
+        try {
+            if (this.groupChannelLock.tryLock(LOCK_TIMEOUT_MILLIS, TimeUnit.MILLISECONDS)) {
+                try {
+                    HashMap<Channel, ClientChannelInfo> channelClientChannelInfoHashMap = groupChannelTable.get(groupId);
+                    if (channelClientChannelInfoHashMap != null) {
+                        for (Channel channel : channelClientChannelInfoHashMap.keySet()) {
+                            channelList.add(channel);
+                        }
+                    } else {
+                        log.warn("Check transaction failed, channel table is empty. groupId={}", groupId);
+                        return null;
+                    }
+                } finally {
+                    this.groupChannelLock.unlock();
+                }
+            } else {
+                log.error("tryLock timeout when tryLock in getAvaliableChannel. groupId={}", groupId);
                 return null;
             }
-
-            int index = positiveAtomicCounter.incrementAndGet() % size;
-            Channel channel = channelList.get(index);
-            int count = 0;
-            boolean isOk = channel.isActive() && channel.isWritable();
-            while (count++ < GET_AVALIABLE_CHANNEL_RETRY_COUNT) {
-                if (isOk) {
-                    return channel;
-                }
-                index = (++index) % size;
-                channel = channelList.get(index);
-                isOk = channel.isActive() && channel.isWritable();
-            }
-        } else {
-            log.warn("Check transaction failed, channel table is empty. groupId={}", groupId);
+        } catch (InterruptedException e) {
+            log.error("InterruptedException occurs when tryLock in getAvaliableChannel. groupId={}", groupId);
             return null;
         }
-        return null;
+
+        int size = channelList.size();
+        if (0 == size) {
+            log.warn("Channel list is empty. groupId={}", groupId);
+            return null;
+        }
+
+        Channel lastActiveChannel = null;
+
+        int index = positiveAtomicCounter.incrementAndGet() % size;
+        Channel channel = channelList.get(index);
+        int count = 0;
+        boolean isOk = channel.isActive() && channel.isWritable();
+        while (count++ < GET_AVALIABLE_CHANNEL_RETRY_COUNT) {
+            if (isOk) {
+                return channel;
+            }
+            if (channel.isActive()) {
+                lastActiveChannel = channel;
+            }
+            index = (++index) % size;
+            channel = channelList.get(index);
+            isOk = channel.isActive() && channel.isWritable();
+        }
+
+        return lastActiveChannel;
     }
 }
