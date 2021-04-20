@@ -47,6 +47,11 @@ public class RebalanceLitePullImpl extends RebalanceImpl {
 
     @Override
     public void messageQueueChanged(String topic, Set<MessageQueue> mqAll, Set<MessageQueue> mqDivided) {
+        if (mqDivided.size() > 0) {
+            LogUtil.log("%s get queue", this.hashCode());
+        } else {
+            LogUtil.log("%s lost queue", this.hashCode());
+        }
         MessageQueueListener messageQueueListener = this.litePullConsumerImpl.getDefaultLitePullConsumer().getMessageQueueListener();
         if (messageQueueListener != null) {
             try {

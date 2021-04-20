@@ -506,6 +506,9 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
 
             if (endTime - System.currentTimeMillis() > 0) {
                 while (consumeRequest != null && consumeRequest.getProcessQueue().isDropped()) {
+                    if(consumeRequest.getMessageExts().size()>0){
+                        LogUtil.log("drop " + consumeRequest.getMessageExts().size() + " msgs");
+                    }
                     consumeRequest = consumeRequestCache.poll(endTime - System.currentTimeMillis(), TimeUnit.MILLISECONDS);
                     if (endTime - System.currentTimeMillis() <= 0)
                         break;
@@ -682,7 +685,6 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
         public void run() {
 
             if (!this.isCancelled()) {
-
                 if (assignedMessageQueue.isPaused(messageQueue)) {
                     scheduledThreadPoolExecutor.schedule(this, PULL_TIME_DELAY_MILLS_WHEN_PAUSE, TimeUnit.MILLISECONDS);
                     log.debug("Message Queue: {} has been paused!", messageQueue);
@@ -695,6 +697,14 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
                     log.info("The message queue not be able to poll, because it's dropped. group={}, messageQueue={}", defaultLitePullConsumer.getConsumerGroup(), this.messageQueue);
                     return;
                 }
+
+                LogUtil.log("%s pull step 1", rebalanceImpl.hashCode());
+                try {
+                    Thread.sleep(3000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                LogUtil.log("%s pull step 2", rebalanceImpl.hashCode());
 
                 if (consumeRequestCache.size() * defaultLitePullConsumer.getPullBatchSize() > defaultLitePullConsumer.getPullThresholdForAll()) {
                     scheduledThreadPoolExecutor.schedule(this, PULL_TIME_DELAY_MILLS_WHEN_FLOW_CONTROL, TimeUnit.MILLISECONDS);
@@ -756,6 +766,7 @@ public class DefaultLitePullConsumerImpl implements MQConsumerInner {
                             final Object objLock = messageQueueLock.fetchLockObject(messageQueue);
                             synchronized (objLock) {
                                 if (pullResult.getMsgFoundList() != null && !pullResult.getMsgFoundList().isEmpty() && assignedMessageQueue.getSeekOffset(messageQueue) == -1) {
+                                    LogUtil.log("submit " + pullResult.getMsgFoundList().size() + " msgs");
                                     processQueue.putMessage(pullResult.getMsgFoundList());
                                     submitConsumeRequest(new ConsumeRequest(pullResult.getMsgFoundList(), messageQueue, processQueue));
                                 }
